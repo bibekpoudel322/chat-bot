@@ -1,0 +1,138 @@
+#include <SD.h>                       // need to include the SD library
+#define SD_ChipSelectPin 4            // using digital pin 10 on arduino uno 328, can use other pins
+#include <TMRpcm.h>                   // need to include TMRpcm library
+#include <SPI.h>                      // need to include the serial 
+
+TMRpcm tmrpcm;
+#define IN1 7                         /* Input 1,2,3,4 pins of L298N motor driver in the digital pins 7,8,3,2 respectively */
+#define IN2 8
+#define IN3 3
+#define IN4 2
+#define ENA 6                          /*Enable Pins A and B of motor driver to the arduino digital pins 6 and 5 respectively*/
+#define ENB 5
+String voice;
+void forward()                     //forward function
+{
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4, LOW);
+  digitalWrite(ENA,HIGH);
+  digitalWrite(ENB,HIGH);
+delay(3000);                          //wait 3seconds i.e 3000 milliseconds
+Stop();
+  
+}
+
+void back()                           //backward function
+ {
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, HIGH);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, HIGH);
+  digitalWrite(ENA,HIGH);
+  digitalWrite(ENB,HIGH);
+delay(3000);                       //wait 3seconds i.e 3000 milliseconds
+Stop();
+}
+
+void right()                    //right function
+{
+ digitalWrite(IN1, LOW);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4, LOW);
+  digitalWrite(ENA,LOW);
+  digitalWrite(ENB,HIGH);
+delay(3000);                     //wait 3seconds i.e 3000 milliseconds
+Stop();
+  
+}
+
+void left()               //left function
+{
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, LOW);
+  digitalWrite(ENA,HIGH);
+  digitalWrite(ENB,LOW);
+delay(3000);
+Stop();                         //wait 3seconds i.e 3000 milliseconds
+  
+} 
+
+void Stop()                         //stop function
+{digitalWrite(IN1, LOW);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, LOW);
+  digitalWrite(ENA,LOW);
+  digitalWrite(ENB,LOW);
+  
+}
+
+void setup()
+{
+pinMode(IN1, OUTPUT);       //defining the input and enable pins as output
+  pinMode(IN2, OUTPUT);
+  pinMode(IN3, OUTPUT);
+  pinMode(IN4, OUTPUT);
+  pinMode(ENA, OUTPUT);
+  pinMode(ENB, OUTPUT);
+tmrpcm.speakerPin=9;         //speaker pin to pin no 9 of arduino
+Serial.begin(9600);                    
+                                
+                                
+if(!SD.begin(SD_ChipSelectPin)) //extract data from module
+{
+  Serial.println("SD fail");
+  return;
+}
+tmrpcm.quality(1);              //set sound quality
+tmrpcm.setVolume(5);
+tmrpcm.play("hello.wav",0);     //at first execute hello everyone sound
+tmrpcm.volume(0); 
+
+}
+
+void loop() {
+  while (Serial.available()){  //Check if there is an available byte to read
+  delay(10); //Delay added to make thing stable
+  char c = Serial.read(); //Conduct a serial read
+  if (c == '#') {break;} //Exit the loop when the # is detected after the word
+  voice += c; //Shorthand for voice = voice + c
+  } 
+  if (voice.length() > 0) {
+    Serial.println(voice);
+//-----------------------------------------------------------------------//   
+  //----------Control Multiple Pins/ LEDs----------// 
+       if(voice == "*what is your name" || voice=="*your name") {tmrpcm.play("name.wav",0);}  
+  else if(voice == "*how are you"){tmrpcm.play("fine.wav",0);}
+else if(voice == "*turn left"){left();}   //execute left function
+else if(voice == "*turn right"){right();} //execute right function
+else if(voice == "*go ahead"){forward();}  //execute left function
+else if(voice == "*go back"){back();}         //execute left function
+
+  else if(voice == "*who made you"|| voice=="*who is your boss"|| voice=="*who is your master"){tmrpcm.play("made.wav",0);} //say who made you 
+  else if(voice == "*are you a robot"|| voice=="*are you a machine"){tmrpcm.play("robot.wav",0);}     /*say answer according to the question*/
+  else if(voice == "*don't lie ok"){tmrpcm.play("ok.wav",0);}
+  else if(voice == "*how are you"){tmrpcm.play("fine.wav",0);}
+  else if(voice == "*will you marry me"){tmrpcm.play("no.wav",0);}
+  else if(voice == "*what do you eat" ||voice=="*what do you feed on"||voice=="*how do you survive" ){tmrpcm.play("charge.wav",0);}
+  else if(voice == "*say something about me" ||voice=="*what do you know about me"){tmrpcm.play("smart.wav",0);}
+  else if(voice == "*what can you do" ||voice=="*what are your features" ||voice=="*what are you able to do"){tmrpcm.play("do.wav",0);}
+  else if(voice == "*how are you made" ||voice=="*what components are there inside you" ||voice=="*how were you made"){tmrpcm.play("how.wav",0);}
+  else if(voice == "*how are you made" ||voice=="*what components are there inside you" ||voice=="*how were you made"){tmrpcm.play("how.wav",0);}
+  else if(voice == "*will World War 3 occur" ||voice=="*will World War 3 happen" ||voice=="*can World War 3 happen in near future"){tmrpcm.play("noitwont.wav",0);}
+  
+  
+  
+  
+  }
+    
+ 
+ 
+voice=""; //Reset the variable after initiating
+}
+
